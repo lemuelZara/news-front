@@ -7,9 +7,11 @@ export default async function handler(req, res) {
   const dbMaxConnectionsResult = await database.query("SHOW max_connections;");
   const dbMaxConnectionsValue = dbMaxConnectionsResult.rows[0].max_connections;
 
-  const dbOpenedConnectionsResult = await database.query(
-    "SELECT COUNT(*)::int FROM pg_stat_activity WHERE datname = 'local_db';",
-  );
+  const dbName = process.env.POSTGRES_DB;
+  const dbOpenedConnectionsResult = await database.query({
+    text: "SELECT COUNT(*)::int FROM pg_stat_activity WHERE datname = $1;",
+    values: [dbName],
+  });
   const dbOpenedConnectionsValue = dbOpenedConnectionsResult.rows[0].count;
 
   const updatedAt = new Date().toISOString();
